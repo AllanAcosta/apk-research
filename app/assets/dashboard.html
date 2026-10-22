@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Visor local</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;background:#0d1524;color:#e8eef8}body{max-width:1000px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center}h1{font-size:30px}small,.muted{color:#adbad0}section{background:#172238;border:1px solid #31415d;border-radius:18px;padding:22px;margin:20px 0}input,button{font:inherit;padding:12px;border-radius:10px;border:1px solid #546988;margin:6px 4px 6px 0}input{background:#0d1524;color:white;max-width:90%;width:340px}button{background:#8de6d6;color:#0d1524;cursor:pointer}button.secondary{background:#26374f;color:white}#picture{width:100%;max-height:65vh;object-fit:contain;background:#080d16;border-radius:12px}#picture:not([src]){display:none}#state{color:#8de6d6}.warning{font-size:14px;color:#f1c88d}#error{color:#ffb0a7}a{color:#8de6d6}
+</style>
+<header><h1>Visor local</h1><small>RED LOCAL · EN DIRECTO</small></header>
+<p class="muted">Cámara, pantalla y audio desde tu Android. Tú controlas las fuentes desde el teléfono.</p>
+<section id="login"><h2>Conectar al teléfono</h2><label for="code">Código que aparece en la aplicación</label><br><input id="code" type="password" autocomplete="off" spellcheck="false"><button id="connect">Conectar</button><p id="error" role="alert"></p></section>
+<main id="viewer" hidden><section><p id="state" role="status">Conectando…</p><img id="picture" alt="Transmisión del teléfono"><p id="empty">Activa una cámara o comparte la pantalla desde la app del teléfono.</p><p class="muted">La imagen se actualiza hasta 5 veces por segundo. Solo se comparte una fuente visual a la vez.</p></section>
+<section><h2>Micrófono</h2><button id="listen">Escuchar audio</button><button id="mute" class="secondary">Silenciar</button><span id="audioState" role="status">Sin reproducción</span><p class="muted">Activa primero el micrófono en el teléfono. Usa auriculares para evitar acoples.</p></section><button id="disconnect" class="secondary">Desconectar este navegador</button></main>
+<p class="warning">HTTP sin cifrar: usa únicamente una red local de confianza. Cualquier persona con el código puede acceder mientras el servidor esté activo. Para revocar todos los accesos, detén el servidor en el teléfono.</p>
+<script>
+let token='',connected=false,objectURL=null,audio=null,abort=null,nextTime=0,carry=new Uint8Array(0);
+const $=id=>document.getElementById(id);
+async function api(path,signal){const r=await fetch(path,{headers:{Authorization:'Bearer '+token},cache:'no-store',signal});if(r.status===401)throw Error('Código incorrecto o servidor reiniciado.');if(!r.ok)throw Error('No disponible ('+r.status+').');return r;}
+$('connect').onclick=async()=>{token=$('code').value.trim();try{await api('/status');connected=true;$('login').hidden=true;$('viewer').hidden=false;$('error').textContent='';poll();}catch(e){$('error').textContent=e.message;}};
+$('code').onkeydown=e=>{if(e.key==='Enter')$('connect').click();};
+async function poll(){while(connected){try{const s=await(await api('/status')).json();$('state').textContent='Fuente: '+s.source+' · Micrófono '+(s.mic?'activo':'apagado');const r=await api('/frame');if(r.status===204){$('picture').removeAttribute('src');$('empty').hidden=false;}else{const blob=await r.blob();const old=objectURL;objectURL=URL.createObjectURL(blob);$('picture').src=objectURL;$('empty').hidden=true;if(old)URL.revokeObjectURL(old);}}catch(e){$('state').textContent=e.message+' Revisa el teléfono y la conexión.';}await new Promise(r=>setTimeout(r,200));}}
+function stopAudio(){if(abort)abort.abort();abort=null;if(audio)audio.close();audio=null;carry=new Uint8Array(0);$('audioState').textContent='Sin reproducción';}
+$('mute').onclick=stopAudio;
+$('listen').onclick=async()=>{
+ stopAudio();const ctx=new(window.AudioContext||window.webkitAudioContext)();audio=ctx;const controller=new AbortController();abort=controller;
+ try{await ctx.resume();nextTime=ctx.currentTime+.15;const r=await api('/audio',controller.signal);const reader=r.body.getReader();$('audioState').textContent='Escuchando';
+ while(!controller.signal.aborted){const {value,done}=await reader.read();if(done)break;let bytes=new Uint8Array(carry.length+value.length);bytes.set(carry);bytes.set(value,carry.length);const n=Math.floor(bytes.length/2);carry=bytes.slice(n*2);if(!n)continue;const b=ctx.createBuffer(1,n,16000),out=b.getChannelData(0);for(let i=0;i<n;i++){let v=bytes[2*i]|(bytes[2*i+1]<<8);out[i]=(v>32767?v-65536:v)/32768;}if(nextTime>ctx.currentTime+1)continue;nextTime=Math.max(nextTime,ctx.currentTime+.03);const source=ctx.createBufferSource();source.buffer=b;source.connect(ctx.destination);source.start(nextTime);nextTime+=b.duration;
+ }if(audio===ctx)stopAudio();
+ }catch(e){if(audio===ctx){stopAudio();$('audioState').textContent=e.name==='AbortError'?'Sin reproducción':e.message+' Activa el micrófono en el teléfono.';}}
+};
+$('disconnect').onclick=()=>{connected=false;stopAudio();token='';$('code').value='';$('viewer').hidden=true;$('login').hidden=false;$('picture').removeAttribute('src');if(objectURL)URL.revokeObjectURL(objectURL);};
+window.addEventListener('pagehide',()=>{connected=false;stopAudio();});
+</script></html>
