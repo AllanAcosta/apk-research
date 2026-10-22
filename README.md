@@ -2,6 +2,8 @@
 
 Aplicación Android nativa, escrita desde cero en Java, que sirve un panel web en la misma red local. Android 8.0 (API 26) o posterior; compilada con API 35, sin dependencias de terceros en la APK.
 
+[Descargar APK firmada de prueba](https://github.com/AllanAcosta/apk-research/raw/refs/heads/main/downloads/visor-local-1.0.apk) · [SHA-256](downloads/SHA256SUMS)
+
 ## Instalar y usar
 
 1. Instala `build/visor-local-1.0.apk` en el teléfono. Android puede pedir autorización para instalar aplicaciones desde el navegador o gestor de archivos usado. La APK está firmada para pruebas con una clave local, no destinada a una tienda.
