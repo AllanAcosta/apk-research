@@ -19,6 +19,10 @@ public final class ServerTest {
    c=request("/audio",true);check(c.getResponseCode()==409,"no microphone before activation");c.disconnect();
    service.mic=true;c=request("/audio",true);check(c.getResponseCode()==200&&c.getInputStream().readNBytes(4)[3]==4,"PCM audio streaming");c.disconnect();service.mic=false;
    c=request("/unknown",true);check(c.getResponseCode()==404,"unknown route");c.disconnect();
+   c=request("/uninstall-request",false);c.setRequestMethod("POST");check(c.getResponseCode()==401&&!service.uninstallRequested,"uninstall requires authorization");c.disconnect();
+   c=request("/uninstall-request",true);check(c.getResponseCode()==405&&!service.uninstallRequested,"GET cannot request uninstall");c.disconnect();
+   c=request("/uninstall-request",true);c.setRequestMethod("POST");check(c.getResponseCode()==202&&service.uninstallRequested,"authenticated POST queues consent request");c.disconnect();
+   c=request("/status",true);c.setRequestMethod("POST");check(c.getResponseCode()==405,"POST cannot invoke read routes");c.disconnect();
   }finally{server.close();}
   try(ServerSocket rebind=new ServerSocket()){rebind.setReuseAddress(true);rebind.bind(new InetSocketAddress(port));check(true,"server releases port");}
   System.out.println(count+" checks passed");

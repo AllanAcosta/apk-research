@@ -29,6 +29,6 @@ if [ ! -f "$KEY" ]; then
  keytool -genkeypair -keystore "$KEY" -storepass android -keypass android -alias visor-local -dname 'CN=Visor Local Development' -keyalg RSA -keysize 3072 -validity 10000 -noprompt
  chmod 600 "$KEY"
 fi
-"$TOOLS/apksigner" sign --ks "$KEY" --ks-key-alias visor-local --ks-pass pass:android --key-pass pass:android --out "$OUT/visor-local-1.0.apk" "$OUT/aligned.apk"
-"$TOOLS/apksigner" verify --verbose "$OUT/visor-local-1.0.apk"
-sha256sum "$OUT/visor-local-1.0.apk"
+"$TOOLS/apksigner" sign --ks "$KEY" --ks-key-alias visor-local --ks-pass pass:android --key-pass pass:android --out "$OUT/visor-local-1.1.apk" "$OUT/aligned.apk"
+"$TOOLS/apksigner" verify --verbose "$OUT/visor-local-1.1.apk"
+sha256sum "$OUT/visor-local-1.1.apk"

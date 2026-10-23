@@ -36,16 +36,21 @@ public final class LocalServer implements AutoCloseable {
         try(Socket s=socket){
             InputStream in=s.getInputStream();OutputStream out=s.getOutputStream();String request=line(in);
             if(request==null)return;
-            String[] parts=request.split(" ");if(parts.length!=3||!parts[0].equals("GET")){reply(out,405,"text/plain","GET required".getBytes(StandardCharsets.UTF_8));return;}
+            String[] parts=request.split(" ");if(parts.length!=3||(!parts[0].equals("GET")&&!parts[0].equals("POST"))){reply(out,405,"text/plain","GET required".getBytes(StandardCharsets.UTF_8));return;}
             String auth="";int count=0;String h;
             while((h=line(in))!=null&&!h.isEmpty()){
                 if(++count>32)throw new IOException("Too many headers");
                 if(h.regionMatches(true,0,"Authorization:",0,14))auth=h.substring(14).trim();
             }
             String path=parts[1].split("\\?",2)[0];
+            if(!path.equals("/uninstall-request")&&!parts[0].equals("GET")){reply(out,405,"text/plain",new byte[0]);return;}
             if(path.equals("/")){reply(out,200,"text/html; charset=utf-8",service.dashboard().getBytes(StandardCharsets.UTF_8));return;}
             if(!MessageDigest.isEqual(auth.getBytes(StandardCharsets.UTF_8),("Bearer "+service.token).getBytes(StandardCharsets.UTF_8))){reply(out,401,"text/plain","Código incorrecto".getBytes(StandardCharsets.UTF_8));return;}
-            if(path.equals("/frame")){
+            if(path.equals("/uninstall-request")){
+                if(!parts[0].equals("POST")){reply(out,405,"text/plain",new byte[0]);return;}
+                service.requestUninstall();
+                reply(out,202,"application/json","{\"pending\":true}".getBytes(StandardCharsets.UTF_8));
+            }else if(path.equals("/frame")){
                 byte[] frame=service.frame;if(frame==null)reply(out,204,"image/jpeg",new byte[0]);else reply(out,200,"image/jpeg",frame);
             }else if(path.equals("/status")){
                 String status="{\"source\":\""+service.source+"\",\"mic\":"+service.mic+"}";

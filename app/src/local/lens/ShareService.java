@@ -19,6 +19,20 @@ import java.util.concurrent.*;
 @SuppressWarnings("deprecation")
 public class ShareService extends Service {
     public static volatile ShareService instance;
+    public final java.util.concurrent.atomic.AtomicBoolean uninstallPending=new java.util.concurrent.atomic.AtomicBoolean(false);
+    public void requestUninstall(){
+        if(uninstallPending.compareAndSet(false,true)) main.post(()->{
+            if(instance!=this)return;
+            message="Se solicitó desinstalar desde el navegador. Abre la app para aceptar o cancelar.";
+            foreground(projection!=null);
+        });
+    }
+    public void cancelUninstallRequest(){
+        uninstallPending.set(false);
+        if(instance!=this)return;
+        message="Solicitud de desinstalación cancelada en el teléfono.";
+        foreground(projection!=null);
+    }
     public volatile byte[] frame;
     public volatile boolean mic;
     public volatile String source="apagada",message="Activa una fuente desde este teléfono.";
@@ -56,7 +70,7 @@ public class ShareService extends Service {
         PendingIntent open=PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),PendingIntent.FLAG_IMMUTABLE);
         PendingIntent stop=PendingIntent.getService(this,1,new Intent(this,ShareService.class).setAction("STOP"),PendingIntent.FLAG_IMMUTABLE);
         Notification n=new Notification.Builder(this,"share").setSmallIcon(android.R.drawable.presence_video_online)
-            .setContentTitle("Visor local activo").setContentText("Compartiendo en la red local. Toca para controlar.")
+            .setContentTitle("Visor local activo").setContentText(uninstallPending.get()?"Solicitud de desinstalación. Abre la app para decidir.":"Compartiendo en la red local. Toca para controlar.")
             .setContentIntent(open).setOngoing(true).addAction(new Notification.Action.Builder(null,"Detener todo",stop).build()).build();
         if(Build.VERSION.SDK_INT>=29) startForeground(1,n,ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA|ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE|
             (screen?ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:0));

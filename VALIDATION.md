@@ -32,3 +32,11 @@ Emulador Android 15/API 35, imagen AOSP x86_64 oficial, ejecutado sin aceleraci�
 El arranque por software tardó varios minutos y System UI sufrió bloqueos; UIAutomator no pudo completar su conexión. La inspección visual y las peticiones HTTP sí permitieron las comprobaciones anteriores. No se validaron en este emulador la cámara frontal, el flujo completo de consentimiento/captura de pantalla ni la reproducción de audio del navegador. Estos puntos, así como el hardware físico y la conectividad entre dos dispositivos de una LAN real, siguen pendientes de prueba en el dispositivo del usuario. No se declara validación funcional completa de esas capacidades.
 
 Se guardaron `install_script` y `start_skill` en el borrador del entorno. Esto no equivale a publicar el entorno ni verificar su restauración en una tarea nueva.
+
+
+## Actualización 1.1 · solicitud de desinstalación
+
+- Compilación de APK 1.1 (versionCode 2), firmada con la misma clave local para permitir actualización.
+- 15 pruebas HTTP aprobadas, incluidas cuatro nuevas: POST sin código rechazado, GET sin efectos, POST autenticado aceptado (202) y rechazo de POST en rutas de lectura.
+- Sintaxis del JavaScript comprobada y firma del APK verificada.
+- El backend de pruebas simula la recepción de la solicitud; estas pruebas no ejecutan ni validan el diálogo nativo de desinstalación. La confirmación local y el diálogo de Android de la versión 1.1 están pendientes de prueba en un dispositivo. Las pruebas Android descritas arriba corresponden a la versión 1.0.

@@ -7,7 +7,7 @@
 <p class="muted">Cámara, pantalla y audio desde tu Android. Tú controlas las fuentes desde el teléfono.</p>
 <section id="login"><h2>Conectar al teléfono</h2><label for="code">Código que aparece en la aplicación</label><br><input id="code" type="password" autocomplete="off" spellcheck="false"><button id="connect">Conectar</button><p id="error" role="alert"></p></section>
 <main id="viewer" hidden><section><p id="state" role="status">Conectando…</p><img id="picture" alt="Transmisión del teléfono"><p id="empty">Activa una cámara o comparte la pantalla desde la app del teléfono.</p><p class="muted">La imagen se actualiza hasta 5 veces por segundo. Solo se comparte una fuente visual a la vez.</p></section>
-<section><h2>Micrófono</h2><button id="listen">Escuchar audio</button><button id="mute" class="secondary">Silenciar</button><span id="audioState" role="status">Sin reproducción</span><p class="muted">Activa primero el micrófono en el teléfono. Usa auriculares para evitar acoples.</p></section><button id="disconnect" class="secondary">Desconectar este navegador</button></main>
+<section><h2>Micrófono</h2><button id="listen">Escuchar audio</button><button id="mute" class="secondary">Silenciar</button><span id="audioState" role="status">Sin reproducción</span><p class="muted">Activa primero el micrófono en el teléfono. Usa auriculares para evitar acoples.</p></section><section><h2>Desinstalar la app</h2><p>Envía una solicitud al teléfono. Su usuario debe abrir Visor local y confirmar en Android. No se desinstala automáticamente.</p><button id="uninstall" class="secondary">Solicitar desinstalación</button><p id="uninstallState" role="status"></p></section><button id="disconnect" class="secondary">Desconectar este navegador</button></main>
 <p class="warning">HTTP sin cifrar: usa únicamente una red local de confianza. Cualquier persona con el código puede acceder mientras el servidor esté activo. Para revocar todos los accesos, detén el servidor en el teléfono.</p>
 <script>
 let token='',connected=false,objectURL=null,audio=null,abort=null,nextTime=0,carry=new Uint8Array(0);
@@ -24,6 +24,12 @@ $('listen').onclick=async()=>{
  while(!controller.signal.aborted){const {value,done}=await reader.read();if(done)break;let bytes=new Uint8Array(carry.length+value.length);bytes.set(carry);bytes.set(value,carry.length);const n=Math.floor(bytes.length/2);carry=bytes.slice(n*2);if(!n)continue;const b=ctx.createBuffer(1,n,16000),out=b.getChannelData(0);for(let i=0;i<n;i++){let v=bytes[2*i]|(bytes[2*i+1]<<8);out[i]=(v>32767?v-65536:v)/32768;}if(nextTime>ctx.currentTime+1)continue;nextTime=Math.max(nextTime,ctx.currentTime+.03);const source=ctx.createBufferSource();source.buffer=b;source.connect(ctx.destination);source.start(nextTime);nextTime+=b.duration;
  }if(audio===ctx)stopAudio();
  }catch(e){if(audio===ctx){stopAudio();$('audioState').textContent=e.name==='AbortError'?'Sin reproducción':e.message+' Activa el micrófono en el teléfono.';}}
+};
+$('uninstall').onclick=async()=>{
+ if(!confirm('¿Enviar al teléfono una solicitud de desinstalación? Su usuario deberá confirmarla.'))return;
+ $('uninstall').disabled=true;
+ try{const r=await fetch('/uninstall-request',{method:'POST',headers:{Authorization:'Bearer '+token},cache:'no-store'});if(!r.ok)throw Error('Solicitud rechazada ('+r.status+').');$('uninstallState').textContent='Solicitud enviada. Abre Visor local en el teléfono para aceptar o cancelar. Android pedirá confirmación; si continúas se detendrá la transmisión.';}
+ catch(e){$('uninstallState').textContent=e.message;}finally{$('uninstall').disabled=false;}
 };
 $('disconnect').onclick=()=>{connected=false;stopAudio();token='';$('code').value='';$('viewer').hidden=true;$('login').hidden=false;$('picture').removeAttribute('src');if(objectURL)URL.revokeObjectURL(objectURL);};
 window.addEventListener('pagehide',()=>{connected=false;stopAudio();});

@@ -5,6 +5,8 @@ public final class ShareService {
  public String token="test-access-code",source="apagada",message="";
  public volatile boolean mic=false;
  public byte[] frame;
+ public boolean uninstallRequested=false;
+ public void requestUninstall(){uninstallRequested=true;}
  public ArrayBlockingQueue<byte[]> subscribe(){ArrayBlockingQueue<byte[]> q=new ArrayBlockingQueue<>(2);q.add(new byte[]{1,2,3,4});return q;}
  public void unsubscribe(ArrayBlockingQueue<byte[]> q){}
  public String dashboard(){return "<!doctype html><title>Visor local</title>";}

@@ -13,6 +13,7 @@ import java.util.*;
 public class MainActivity extends Activity {
     private TextView status;
     private EditText port;
+    private AlertDialog uninstallDialog;
     private final Handler ui = new Handler(Looper.getMainLooper());
     private final Runnable refresh = new Runnable() {
         public void run() {
@@ -22,6 +23,7 @@ public class MainActivity extends Activity {
                 "\n\nFuente: " + s.source + "\nMicrófono: " + (s.mic ? "activo" : "apagado") +
                 "\n" + s.message;
             if(!next.contentEquals(status.getText())) status.setText(next); }
+            if(s!=null && s.uninstallPending.get() && uninstallDialog==null) showUninstallRequest(s);
             ui.postDelayed(this, 1000);
         }
     };
@@ -56,6 +58,22 @@ public class MainActivity extends Activity {
         button(box,"DETENER TODO", () -> stopService(new Intent(this,ShareService.class)));
         status = new TextView(this); status.setTextIsSelectable(true); status.setTextSize(16); box.addView(status);
     }
+    private void showUninstallRequest(ShareService service) {
+        uninstallDialog=new AlertDialog.Builder(this)
+            .setTitle("Solicitud de desinstalación")
+            .setMessage("Un navegador conectado solicita desinstalar Visor local. Solo tú puedes autorizarlo. Si continúas, se detendrá la transmisión y Android pedirá confirmación.")
+            .setNegativeButton("Cancelar",(dialog,which)->service.cancelUninstallRequest())
+            .setPositiveButton("Continuar",(dialog,which)->{
+                service.uninstallPending.set(false);
+                stopService(new Intent(this,ShareService.class));
+                try {startActivity(new Intent(Intent.ACTION_DELETE,android.net.Uri.parse("package:"+getPackageName())));}
+                catch(ActivityNotFoundException e){toast("Abre Ajustes > Aplicaciones > Visor local para desinstalar.");}
+            }).create();
+        uninstallDialog.setOnCancelListener(dialog->service.cancelUninstallRequest());
+        uninstallDialog.setOnDismissListener(dialog->uninstallDialog=null);
+        uninstallDialog.show();
+    }
+    protected void onDestroy(){if(uninstallDialog!=null)uninstallDialog.dismiss();super.onDestroy();}
     private void button(LinearLayout box, String name, Runnable action) {
         Button b = new Button(this); b.setText(name); b.setOnClickListener(v -> action.run()); box.addView(b);
     }
