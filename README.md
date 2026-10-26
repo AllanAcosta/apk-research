@@ -1,14 +1,14 @@
-# Visor local · Android
+# Sortnyx Controller · Android
 
 Aplicación Android nativa, escrita desde cero en Java, que sirve un panel web en la misma red local. Android 8.0 (API 26) o posterior; compilada con API 35, sin dependencias de terceros en la APK.
 
-[Descargar APK firmada de prueba](https://github.com/AllanAcosta/apk-research/raw/refs/heads/main/downloads/visor-local-1.1.apk) · [SHA-256](downloads/SHA256SUMS)
+[Descargar APK firmada de prueba](https://github.com/AllanAcosta/apk-research/raw/refs/heads/main/downloads/sortnyx-controller-1.2.apk) · [SHA-256](downloads/SHA256SUMS)
 
 ## Instalar y usar
 
-1. Instala `build/visor-local-1.1.apk` en el teléfono. Android puede pedir autorización para instalar aplicaciones desde el navegador o gestor de archivos usado. La APK está firmada para pruebas con una clave local, no destinada a una tienda.
+1. Instala `build/sortnyx-controller-1.2.apk` en el teléfono. Android puede pedir autorización para instalar aplicaciones desde el navegador o gestor de archivos usado. La APK está firmada para pruebas con una clave local, no destinada a una tienda.
 2. Conecta el teléfono y el navegador del otro dispositivo a la misma red Wi-Fi. Algunas redes de invitados aíslan dispositivos y no permiten conectarlos entre sí.
-3. Abre **Visor local**, elige un puerto entre 1024 y 65535 (8080 por defecto) y pulsa **Iniciar servidor**. Concede cámara, micrófono y, desde Android 13, notificaciones. Si deniegas permanentemente un permiso, habilítalo en Ajustes del sistema.
+3. Abre **Sortnyx Controller**, elige un puerto entre 1024 y 65535 (8080 por defecto) y pulsa **Iniciar servidor**. Concede cámara, micrófono y, desde Android 13, notificaciones. Si deniegas permanentemente un permiso, habilítalo en Ajustes del sistema.
 4. Abre en el otro dispositivo la dirección `http://IP_DEL_TELEFONO:PUERTO` que aparece en la app e introduce el código de acceso. El código cambia cada vez que reinicias el servidor; puedes copiarlo con el botón de la app.
 5. Activa **Cámara trasera**, **Cámara frontal** o **Compartir pantalla** en el teléfono. Android requiere una confirmación adicional para compartir la pantalla. Solo hay una fuente visual activa a la vez.
 6. Para audio, activa el micrófono en el teléfono y pulsa **Escuchar audio** en el navegador. Usa auriculares para evitar realimentación.
@@ -40,7 +40,7 @@ bash test.sh
 
 ```sh
 bash build.sh
-/workspace/android-sdk/build-tools/35.0.0/apksigner verify --verbose build/visor-local-1.1.apk
+/workspace/android-sdk/build-tools/35.0.0/apksigner verify --verbose build/sortnyx-controller-1.2.apk
 ```
 
 La clave de prueba se genera en `/workspace/tooling/keys/visor-local.jks`, fuera del repositorio. Su contraseña convencional de desarrollo es `android`; no es una clave de distribución de producción. Conserva esa clave para actualizar instalaciones de prueba sin desinstalar. No la subas al repositorio. `ANDROID_HOME`, `ECJ_JAR` y `SIGNING_KEY` permiten cambiar las rutas. Los scripts no modifican automáticamente código, declaraciones ni archivos de bloqueo.
@@ -52,7 +52,7 @@ La clave de prueba se genera en `/workspace/tooling/keys/visor-local.jks`, fuera
 Cada tarea en la nube ya está aislada: usa este checkout, sin crear worktrees adicionales. No hace falta ejecutar un servicio web en la máquina de desarrollo para compilar la app; el servidor se ejecuta dentro de la APK instalada.
 
 ```sh
-/workspace/android-sdk/platform-tools/adb install -r build/visor-local-1.1.apk
+/workspace/android-sdk/platform-tools/adb install -r build/sortnyx-controller-1.2.apk
 /workspace/android-sdk/platform-tools/adb shell am start -n local.lens/.MainActivity
 ```
 
@@ -62,6 +62,13 @@ Con un dispositivo o emulador autorizado, puedes redirigir un puerto para las pr
 
 Con el código de acceso, pulsa **Solicitar desinstalación** y confirma el envío en el navegador. La petición autenticada usa POST; abrir una URL por GET no inicia la solicitud. Se mantiene una sola solicitud pendiente por sesión.
 
-Si el teléfono está usando otra app, la solicitud queda pendiente y la notificación visible pide abrir Visor local. Android no permite abrir arbitrariamente diálogos desde segundo plano. Al abrir la app, el usuario puede **Cancelar** o **Continuar**. Continuar detiene la transmisión y abre el diálogo oficial de desinstalación de Android: **la persona del teléfono debe confirmar**. Si cancela ese diálogo, la app permanece instalada y el servidor queda detenido; puede iniciarse otra vez manualmente.
+Si el teléfono está usando otra app, la solicitud queda pendiente y la notificación visible pide abrir Sortnyx Controller. Android no permite abrir arbitrariamente diálogos desde segundo plano. Al abrir la app, el usuario puede **Cancelar** o **Continuar**. Continuar detiene la transmisión y abre el diálogo oficial de desinstalación de Android: **la persona del teléfono debe confirmar**. Si cancela ese diálogo, la app permanece instalada y el servidor queda detenido; puede iniciarse otra vez manualmente.
 
 No solicita administración del dispositivo ni elimina datos u otras apps. El navegador confirma que la solicitud fue enviada, no que se completó la desinstalación. El diálogo final sigue sujeto a las políticas y restricciones del dispositivo.
+
+
+## Cambio de nombre en 1.2
+
+El nombre visible de la app, panel web, notificaciones y diálogos es **Sortnyx Controller**. Se conserva el icono de cámara propio y el identificador `local.lens`. Los permisos, indicadores y confirmaciones siguen visibles.
+
+El entorno anterior no está disponible y su clave de firma no se restauró. La APK de prueba 1.2 usa una nueva clave: **no puede actualizar directamente las versiones 1.0/1.1**. Para conservar una instalación anterior, no la reemplaces con esta APK; una actualización compatible requiere recuperar la clave original. Desinstalar la anterior elimina sus datos locales.

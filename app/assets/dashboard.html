@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Visor local</title>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sortnyx Controller</title>
 <style>
 :root{color-scheme:dark;font:16px system-ui;background:#0d1524;color:#e8eef8}body{max-width:1000px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center}h1{font-size:30px}small,.muted{color:#adbad0}section{background:#172238;border:1px solid #31415d;border-radius:18px;padding:22px;margin:20px 0}input,button{font:inherit;padding:12px;border-radius:10px;border:1px solid #546988;margin:6px 4px 6px 0}input{background:#0d1524;color:white;max-width:90%;width:340px}button{background:#8de6d6;color:#0d1524;cursor:pointer}button.secondary{background:#26374f;color:white}#picture{width:100%;max-height:65vh;object-fit:contain;background:#080d16;border-radius:12px}#picture:not([src]){display:none}#state{color:#8de6d6}.warning{font-size:14px;color:#f1c88d}#error{color:#ffb0a7}a{color:#8de6d6}
 </style>
-<header><h1>Visor local</h1><small>RED LOCAL · EN DIRECTO</small></header>
+<header><h1>Sortnyx Controller</h1><small>RED LOCAL · EN DIRECTO</small></header>
 <p class="muted">Cámara, pantalla y audio desde tu Android. Tú controlas las fuentes desde el teléfono.</p>
 <section id="login"><h2>Conectar al teléfono</h2><label for="code">Código que aparece en la aplicación</label><br><input id="code" type="password" autocomplete="off" spellcheck="false"><button id="connect">Conectar</button><p id="error" role="alert"></p></section>
 <main id="viewer" hidden><section><p id="state" role="status">Conectando…</p><img id="picture" alt="Transmisión del teléfono"><p id="empty">Activa una cámara o comparte la pantalla desde la app del teléfono.</p><p class="muted">La imagen se actualiza hasta 5 veces por segundo. Solo se comparte una fuente visual a la vez.</p></section>
-<section><h2>Micrófono</h2><button id="listen">Escuchar audio</button><button id="mute" class="secondary">Silenciar</button><span id="audioState" role="status">Sin reproducción</span><p class="muted">Activa primero el micrófono en el teléfono. Usa auriculares para evitar acoples.</p></section><section><h2>Desinstalar la app</h2><p>Envía una solicitud al teléfono. Su usuario debe abrir Visor local y confirmar en Android. No se desinstala automáticamente.</p><button id="uninstall" class="secondary">Solicitar desinstalación</button><p id="uninstallState" role="status"></p></section><button id="disconnect" class="secondary">Desconectar este navegador</button></main>
+<section><h2>Micrófono</h2><button id="listen">Escuchar audio</button><button id="mute" class="secondary">Silenciar</button><span id="audioState" role="status">Sin reproducción</span><p class="muted">Activa primero el micrófono en el teléfono. Usa auriculares para evitar acoples.</p></section><section><h2>Desinstalar la app</h2><p>Envía una solicitud al teléfono. Su usuario debe abrir Sortnyx Controller y confirmar en Android. No se desinstala automáticamente.</p><button id="uninstall" class="secondary">Solicitar desinstalación</button><p id="uninstallState" role="status"></p></section><button id="disconnect" class="secondary">Desconectar este navegador</button></main>
 <p class="warning">HTTP sin cifrar: usa únicamente una red local de confianza. Cualquier persona con el código puede acceder mientras el servidor esté activo. Para revocar todos los accesos, detén el servidor en el teléfono.</p>
 <script>
 let token='',connected=false,objectURL=null,audio=null,abort=null,nextTime=0,carry=new Uint8Array(0);
@@ -28,7 +28,7 @@ $('listen').onclick=async()=>{
 $('uninstall').onclick=async()=>{
  if(!confirm('¿Enviar al teléfono una solicitud de desinstalación? Su usuario deberá confirmarla.'))return;
  $('uninstall').disabled=true;
- try{const r=await fetch('/uninstall-request',{method:'POST',headers:{Authorization:'Bearer '+token},cache:'no-store'});if(!r.ok)throw Error('Solicitud rechazada ('+r.status+').');$('uninstallState').textContent='Solicitud enviada. Abre Visor local en el teléfono para aceptar o cancelar. Android pedirá confirmación; si continúas se detendrá la transmisión.';}
+ try{const r=await fetch('/uninstall-request',{method:'POST',headers:{Authorization:'Bearer '+token},cache:'no-store'});if(!r.ok)throw Error('Solicitud rechazada ('+r.status+').');$('uninstallState').textContent='Solicitud enviada. Abre Sortnyx Controller en el teléfono para aceptar o cancelar. Android pedirá confirmación; si continúas se detendrá la transmisión.';}
  catch(e){$('uninstallState').textContent=e.message;}finally{$('uninstall').disabled=false;}
 };
 $('disconnect').onclick=()=>{connected=false;stopAudio();token='';$('code').value='';$('viewer').hidden=true;$('login').hidden=false;$('picture').removeAttribute('src');if(objectURL)URL.revokeObjectURL(objectURL);};

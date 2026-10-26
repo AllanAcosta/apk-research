@@ -70,7 +70,7 @@ public class ShareService extends Service {
         PendingIntent open=PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),PendingIntent.FLAG_IMMUTABLE);
         PendingIntent stop=PendingIntent.getService(this,1,new Intent(this,ShareService.class).setAction("STOP"),PendingIntent.FLAG_IMMUTABLE);
         Notification n=new Notification.Builder(this,"share").setSmallIcon(android.R.drawable.presence_video_online)
-            .setContentTitle("Visor local activo").setContentText(uninstallPending.get()?"Solicitud de desinstalación. Abre la app para decidir.":"Compartiendo en la red local. Toca para controlar.")
+            .setContentTitle("Sortnyx Controller activo").setContentText(uninstallPending.get()?"Solicitud de desinstalación. Abre la app para decidir.":"Compartiendo en la red local. Toca para controlar.")
             .setContentIntent(open).setOngoing(true).addAction(new Notification.Action.Builder(null,"Detener todo",stop).build()).build();
         if(Build.VERSION.SDK_INT>=29) startForeground(1,n,ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA|ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE|
             (screen?ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:0));

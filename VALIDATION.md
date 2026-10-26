@@ -40,3 +40,10 @@ Se guardaron `install_script` y `start_skill` en el borrador del entorno. Esto n
 - 15 pruebas HTTP aprobadas, incluidas cuatro nuevas: POST sin código rechazado, GET sin efectos, POST autenticado aceptado (202) y rechazo de POST en rutas de lectura.
 - Sintaxis del JavaScript comprobada y firma del APK verificada.
 - El backend de pruebas simula la recepción de la solicitud; estas pruebas no ejecutan ni validan el diálogo nativo de desinstalación. La confirmación local y el diálogo de Android de la versión 1.1 están pendientes de prueba en un dispositivo. Las pruebas Android descritas arriba corresponden a la versión 1.0.
+
+
+## Actualización 1.2 · Sortnyx Controller
+
+Se cambió el nombre visible en el lanzador, la app, el panel web y las notificaciones. Se conserva el icono propio y los avisos de uso. Compilación completada, etiqueta de manifiesto comprobada, firma APK verificada y 15 pruebas HTTP aprobadas; no se añadieron pruebas para textos. No se ejecutó esta versión en un dispositivo Android.
+
+El nuevo entorno no conserva la clave de firma anterior: el certificado de la APK 1.2 es diferente. No permite actualizar directamente las instalaciones 1.0/1.1; para hacerlo habría que recuperar y usar la clave original. Los APK anteriores publicados se conservan intactos.

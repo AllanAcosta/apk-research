@@ -9,5 +9,5 @@ public final class ShareService {
  public void requestUninstall(){uninstallRequested=true;}
  public ArrayBlockingQueue<byte[]> subscribe(){ArrayBlockingQueue<byte[]> q=new ArrayBlockingQueue<>(2);q.add(new byte[]{1,2,3,4});return q;}
  public void unsubscribe(ArrayBlockingQueue<byte[]> q){}
- public String dashboard(){return "<!doctype html><title>Visor local</title>";}
+ public String dashboard(){return "<!doctype html><title>Sortnyx Controller</title>";}
 }

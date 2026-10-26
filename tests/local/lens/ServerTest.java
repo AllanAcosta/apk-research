@@ -11,7 +11,7 @@ public final class ServerTest {
   try(ServerSocket reserve=new ServerSocket(0)){port=reserve.getLocalPort();}
   ShareService service=new ShareService();LocalServer server=new LocalServer(service,port);server.start();
   try {
-   HttpURLConnection c=request("/",false);check(c.getResponseCode()==200 && new String(c.getInputStream().readAllBytes()).contains("Visor local"),"dashboard accessible");c.disconnect();
+   HttpURLConnection c=request("/",false);check(c.getResponseCode()==200 && new String(c.getInputStream().readAllBytes()).contains("Sortnyx Controller"),"dashboard accessible");c.disconnect();
    for(String route:new String[]{"/status","/frame","/audio"}){c=request(route,false);check(c.getResponseCode()==401,"authentication required: "+route);c.disconnect();}
    c=request("/status",true);check(c.getResponseCode()==200&&new String(c.getInputStream().readAllBytes()).contains("\"mic\":false"),"source status");c.disconnect();
    c=request("/frame",true);check(c.getResponseCode()==204,"no image before consent");c.disconnect();

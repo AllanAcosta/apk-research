@@ -35,14 +35,14 @@ public class MainActivity extends Activity {
             view.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());
             return insets.consumeSystemWindowInsets();
         });
-        TextView title = new TextView(this); title.setText("Visor local"); title.setTextSize(28); box.addView(title);
+        TextView title = new TextView(this); title.setText("Sortnyx Controller"); title.setTextSize(28); box.addView(title);
         TextView intro = new TextView(this);
         intro.setText("Comparte solo lo que actives aquí. Abre la dirección desde otro equipo en la misma Wi-Fi e introduce el código. HTTP no cifra el contenido: usa una red de confianza. No abras el puerto en el router."); box.addView(intro);
         port = new EditText(this); port.setInputType(2); port.setHint("Puerto (1024–65535)"); port.setText(String.valueOf(getPreferences(0).getInt("port",8080))); box.addView(port);
         button(box,"Iniciar servidor", () -> start());
         button(box,"Copiar código de acceso", () -> {
             ShareService s=ShareService.instance; if(s==null){toast("Primero inicia el servidor");return;}
-            ((android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("Visor local",s.token)); toast("Código copiado");
+            ((android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("Sortnyx Controller",s.token)); toast("Código copiado");
         });
         button(box,"Cámara trasera", () -> camera(false));
         button(box,"Cámara frontal", () -> camera(true));
@@ -61,13 +61,13 @@ public class MainActivity extends Activity {
     private void showUninstallRequest(ShareService service) {
         uninstallDialog=new AlertDialog.Builder(this)
             .setTitle("Solicitud de desinstalación")
-            .setMessage("Un navegador conectado solicita desinstalar Visor local. Solo tú puedes autorizarlo. Si continúas, se detendrá la transmisión y Android pedirá confirmación.")
+            .setMessage("Un navegador conectado solicita desinstalar Sortnyx Controller. Solo tú puedes autorizarlo. Si continúas, se detendrá la transmisión y Android pedirá confirmación.")
             .setNegativeButton("Cancelar",(dialog,which)->service.cancelUninstallRequest())
             .setPositiveButton("Continuar",(dialog,which)->{
                 service.uninstallPending.set(false);
                 stopService(new Intent(this,ShareService.class));
                 try {startActivity(new Intent(Intent.ACTION_DELETE,android.net.Uri.parse("package:"+getPackageName())));}
-                catch(ActivityNotFoundException e){toast("Abre Ajustes > Aplicaciones > Visor local para desinstalar.");}
+                catch(ActivityNotFoundException e){toast("Abre Ajustes > Aplicaciones > Sortnyx Controller para desinstalar.");}
             }).create();
         uninstallDialog.setOnCancelListener(dialog->service.cancelUninstallRequest());
         uninstallDialog.setOnDismissListener(dialog->uninstallDialog=null);
